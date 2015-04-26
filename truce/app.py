@@ -3,6 +3,7 @@
 import os.path
 import re
 import sys
+import traceback
 
 import tkinter as tk
 import tkinter.filedialog
@@ -87,41 +88,55 @@ class App(tk.Frame):
         elif tkinter.messagebox.askokcancel(ABANDON_MSG, ABANDON_MSG):
             return True
         return False
+    
+    def error(self, e):
+        self.state()
+        traceback.print_exc()
+        tkinter.messagebox.showerror(type(e).__name__, str(e))
 
     def open(self, event=None):
         if not self.abandon():
             return 'break'
         filename = tkinter.filedialog.askopenfilename()
         if filename:
+            self.state('Opening...')
+            try:
+                with open(filename) as f:
+                    text = f.read()
+            except Exception as e:
+                self.error(e)
+                return 'break'
+            self.textout.delete('1.0', 'end')
+            self.textout.insert('insert', text)
+            self.state('Opened "{}".'.format(
+                os.path.basename(filename)))
+            self.textout.edit_modified(0)
             self.filename = filename
             self.settitle()
-            self.textout.delete('1.0', 'end')
-            self.state('Opening...')
-            with open(filename) as f:
-                self.textout.insert('insert', f.read())
-            self.state('Opened "{}".'.format(os.path.basename(self.filename)))
-            self.textout.edit_modified(0)
         return 'break'
 
     def save(self, event=None):
         if self.filename:
-            self.writeout()
+            self.writeout(self.filename)
         else:
             self.saveas(event)
 
     def saveas(self, event=None):
         filename = tkinter.filedialog.asksaveasfilename()
         if filename:
+            self.writeout(filename)
+
+    def writeout(self, filename):
+        self.state('Saving...')
+        try:
+            with open(filename, 'w') as f:
+                f.write(self.textout.get('1.0', 'end'))
+            self.state('Saved "{}".'.format(os.path.basename(filename)))
+            self.textout.edit_modified(0)
             self.filename = filename
             self.settitle()
-            self.writeout()
-
-    def writeout(self):
-        self.state('Saving...')
-        with open(self.filename, 'w') as f:
-            f.write(self.textout.get('1.0', 'end'))
-        self.state('Saved "{}".'.format(os.path.basename(self.filename)))
-        self.textout.edit_modified(0)
+        except Exception as e:
+            self.error(e)
 
     def sendtext(self, event):
         self.textout.insert('end', self.textin.get('1.0', 'end'))
@@ -168,6 +183,11 @@ def main():
     root = tk.Tk()
     tk.CallWrapper = Catcher
     app = App(master=root)
+
+    def excepthook(exctype, value, traceback):
+        app.error(value)
+    sys.excepthook = excepthook
+
     try:
         app.mainloop()
     except KeyboardInterrupt:

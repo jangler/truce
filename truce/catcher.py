@@ -16,6 +16,5 @@ class Catcher:
                 args = self.subst(*args)
             return self.func(*args)
         except Exception as e:
-            title = type(e).__name__
-            msg = traceback.format_exception_only(type(e), e)
-            tkinter.messagebox.showerror(title=title, message=''.join(msg))
+            traceback.print_exc()
+            tkinter.messagebox.showerror(type(e).__name__, str(e))
