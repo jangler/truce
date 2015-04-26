@@ -44,10 +44,8 @@ class Application(tk.Frame):
         editmenu = tk.Menu(self.menu, tearoff=0)
         editmenu.add_command(label='Undo', underline=0, command=self.undo,
                              accelerator='Ctrl+Z')
-        self.bind_all('<Control-z>', self.undo)
         editmenu.add_command(label='Redo', underline=0, command=self.redo,
                              accelerator='Ctrl+Y')
-        self.bind_all('<Control-y>', self.redo)
         self.menu.add_cascade(label='Edit', underline=0, menu=editmenu)
 
         root.config(menu=self.menu)
@@ -58,11 +56,15 @@ class Application(tk.Frame):
 
         self.textin = tk.Text(self, height=0, undo=1)
         self.textin.bind('<Return>', self.sendtext)
+        self.textin.bind('<Control-z>', self.undo)
+        self.textin.bind('<Control-y>', self.redo)
         self.textin.bind('<Control-o>', self.open)
         self.textin.pack(side='bottom', fill='x')
 
         self.textout = tkinter.scrolledtext.ScrolledText(self, undo=1)
         self.textout.bind('<Return>', self.autoindent)
+        self.textout.bind('<Control-z>', self.undo)
+        self.textout.bind('<Control-y>', self.redo)
         self.textout.bind('<Control-o>', self.open)
         self.textout.pack(side='bottom', expand=1, fill='both')
 
@@ -141,6 +143,7 @@ class Application(tk.Frame):
             self.state()
         except tkinter.TclError as e:
             self.state('{}.'.format(str(e).capitalize()))
+        return 'break'
 
     def redo(self, event=None):
         widget = self.getundofocus()
@@ -149,6 +152,7 @@ class Application(tk.Frame):
             self.state()
         except tkinter.TclError as e:
             self.state('{}.'.format(str(e).capitalize()))
+        return 'break'
 
     def quit(self, event=None):
         if self.abandon():
