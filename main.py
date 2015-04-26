@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os.path
+import re
 import sys
 
 import tkinter as tk
@@ -43,6 +44,7 @@ class Application(tk.Frame):
         self.textin.pack(side='bottom', fill='x')
 
         self.textout = tkinter.scrolledtext.ScrolledText(self)
+        self.textout.bind('<Return>', self.autoindent)
         self.textout.pack(side='bottom', expand=1, fill='both')
 
     def settitle(self):
@@ -71,8 +73,15 @@ class Application(tk.Frame):
         self.status['text'] = 'Saved.'
 
     def sendtext(self, event):
-        self.textout.insert('end', self.textin.get('1.0', 'end')[:-1])
+        self.textout.insert('end', self.textin.get('1.0', 'end'))
         self.textin.delete('1.0', 'end')
+        return 'break'
+
+    def autoindent(self, event):
+        line = self.textout.get('insert linestart', 'insert lineend')
+        indent = re.match('^[\t ]*', line).group(0)
+        self.textout.insert('insert', '\n' + indent)
+        return 'break'
 
 
 root = tk.Tk()
