@@ -6,9 +6,11 @@ import sys
 
 import tkinter as tk
 import tkinter.filedialog
+import tkinter.messagebox
 import tkinter.scrolledtext
 
 VERSION = [0, 0, 0]
+ABANDON_MSG = 'Abandon unsaved changes?'
 
 
 class Application(tk.Frame):
@@ -18,6 +20,7 @@ class Application(tk.Frame):
         self.createWidgets()
         self.filename = None
         self.settitle()
+        master.protocol("WM_DELETE_WINDOW", self.quit)
 
     def createWidgets(self):
         self.menu = tk.Menu(self)
@@ -55,10 +58,12 @@ class Application(tk.Frame):
 
         self.textin = tk.Text(self, height=0, undo=1)
         self.textin.bind('<Return>', self.sendtext)
+        self.textin.bind('<Control-o>', self.open)
         self.textin.pack(side='bottom', fill='x')
 
         self.textout = tkinter.scrolledtext.ScrolledText(self, undo=1)
         self.textout.bind('<Return>', self.autoindent)
+        self.textout.bind('<Control-o>', self.open)
         self.textout.pack(side='bottom', expand=1, fill='both')
 
     def state(self, text=''):
@@ -70,7 +75,16 @@ class Application(tk.Frame):
         else:
             self.master.title('{} {}.{}.{}'.format(sys.argv[0], *VERSION))
 
+    def abandon(self):
+        if not self.textout.edit_modified():
+            return True
+        elif tkinter.messagebox.askokcancel(ABANDON_MSG, ABANDON_MSG):
+            return True
+        return False
+
     def open(self, event=None):
+        if not self.abandon():
+            return 'break'
         filename = tkinter.filedialog.askopenfilename()
         if filename:
             self.filename = filename
@@ -79,8 +93,9 @@ class Application(tk.Frame):
             self.state('Opening...')
             with open(filename) as f:
                 self.textout.insert('insert', f.read())
-            self.state('Opened "{}".'.format(
-                os.path.basename(self.filename)))
+            self.state('Opened "{}".'.format(os.path.basename(self.filename)))
+            self.textout.edit_modified(0)
+        return 'break'
 
     def save(self, event=None):
         if self.filename:
@@ -100,6 +115,7 @@ class Application(tk.Frame):
         with open(self.filename, 'w') as f:
             f.write(self.textout.get('1.0', 'end'))
         self.state('Saved "{}".'.format(os.path.basename(self.filename)))
+        self.textout.edit_modified(0)
 
     def sendtext(self, event):
         self.textout.insert('end', self.textin.get('1.0', 'end'))
@@ -124,7 +140,7 @@ class Application(tk.Frame):
             widget.edit_undo()
             self.state()
         except tkinter.TclError as e:
-            self.state('Nothing to undo.')
+            self.state('{}.'.format(str(e).capitalize()))
 
     def redo(self, event=None):
         widget = self.getundofocus()
@@ -132,7 +148,11 @@ class Application(tk.Frame):
             widget.edit_redo()
             self.state()
         except tkinter.TclError as e:
-            self.state('Nothing to redo.')
+            self.state('{}.'.format(str(e).capitalize()))
+
+    def quit(self, event=None):
+        if self.abandon():
+            super().quit()
 
 
 root = tk.Tk()
