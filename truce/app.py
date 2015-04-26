@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import argparse
 import os.path
 import re
 import sys
@@ -110,25 +111,27 @@ class App(tk.Frame):
         traceback.print_exc()
         tkinter.messagebox.showerror(type(e).__name__, str(e))
 
-    def open(self, event=None):
-        if not self.abandon():
-            return 'break'
-        filename = tkinter.filedialog.askopenfilename()
-        if filename:
-            self.state('Opening...')
-            try:
-                with open(filename) as f:
-                    text = f.read()
-            except Exception as e:
+    def readin(self, filename, quiet=False):
+        self.state('Opening...')
+        try:
+            with open(filename) as f:
+                text = f.read()
+        except Exception as e:
+            if not quiet:
                 self.error(e)
-                return 'break'
-            self.textout.delete('1.0', 'end')
-            self.textout.insert('insert', text)
-            self.state('Opened "{}".'.format(
-                os.path.basename(filename)))
-            self.textout.edit_modified(0)
-            self.filename = filename
-            self.settitle()
+            return
+        self.textout.delete('1.0', 'end')
+        self.textout.insert('insert', text)
+        self.state('Opened "{}".'.format(os.path.basename(filename)))
+        self.textout.edit_modified(0)
+        self.filename = filename
+        self.settitle()
+
+    def open(self, event=None):
+        if self.abandon():
+            filename = tkinter.filedialog.askopenfilename()
+            if filename:
+                self.readin(filename)
         return 'break'
 
     def save(self, event=None):
@@ -194,8 +197,16 @@ class App(tk.Frame):
             super().quit()
 
 
+def parseargs():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--version', action='version', version=signature())
+    parser.add_argument('file', type=str, nargs='?', help='file to edit')
+    return parser.parse_args()
+
+
 def main():
     global root
+    args = parseargs()
     root = tk.Tk()
     tk.CallWrapper = Catcher
     app = App(master=root)
@@ -204,10 +215,13 @@ def main():
         app.error(value)
     sys.excepthook = excepthook
 
+    if args.file:
+        app.readin(args.file, quiet=True)
+        app.filename = args.file
+        app.settitle()
+
     try:
         app.mainloop()
     except KeyboardInterrupt:
         super(tk.Frame, app).quit()
         print()
-
-
