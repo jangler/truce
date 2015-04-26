@@ -12,9 +12,17 @@ import tkinter.scrolledtext
 
 from truce.catcher import Catcher
 
-
 VERSION = [0, 0, 0]
 ABANDON_MSG = 'Abandon unsaved changes?'
+
+
+def signature():
+    return '{} {}.{}.{}'.format(os.path.basename(sys.argv[0]), *VERSION)
+
+
+ABOUT = """{}
+
+http://github.com/jangler/truce""".format(signature())
 
 
 class App(tk.Frame):
@@ -52,6 +60,10 @@ class App(tk.Frame):
                              accelerator='Ctrl+Y')
         self.menu.add_cascade(label='Edit', underline=0, menu=editmenu)
 
+        helpmenu = tk.Menu(self.menu, tearoff=0)
+        helpmenu.add_command(label='About', underline=0, command=self.about)
+        self.menu.add_cascade(label='Help', underline=0, menu=helpmenu)
+
         root.config(menu=self.menu)
 
         self.status = tkinter.Label(self, text='', relief='sunken',
@@ -72,6 +84,9 @@ class App(tk.Frame):
         self.textout.bind('<Control-o>', self.open)
         self.textout.pack(side='bottom', expand=1, fill='both')
 
+    def about(self):
+        tkinter.messagebox.showinfo('About', ABOUT)
+
     def state(self, text=''):
         self.status['text'] = text
 
@@ -79,8 +94,7 @@ class App(tk.Frame):
         if self.filename:
             self.master.title(os.path.basename(self.filename))
         else:
-            self.master.title('{} {}.{}.{}'.format(
-                os.path.basename(sys.argv[0]), *VERSION))
+            self.master.title(signature())
 
     def abandon(self):
         if not self.textout.edit_modified():
