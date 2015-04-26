@@ -74,6 +74,7 @@ class App(tk.Frame):
         self.textin.bind('<Return>', self.sendtext)
         self.textin.bind('<Control-z>', self.undo)
         self.textin.bind('<Control-y>', self.redo)
+        self.textin.bind('<Control-Z>', self.redo)
         self.textin.bind('<Control-o>', self.open)
         self.textin.pack(side='bottom', fill='x')
 
@@ -81,6 +82,7 @@ class App(tk.Frame):
         self.textout.bind('<Return>', self.autoindent)
         self.textout.bind('<Control-z>', self.undo)
         self.textout.bind('<Control-y>', self.redo)
+        self.textout.bind('<Control-Z>', self.redo)
         self.textout.bind('<Control-o>', self.open)
         self.textout.pack(side='bottom', expand=1, fill='both')
 
@@ -207,3 +209,5 @@ def main():
     except KeyboardInterrupt:
         super(tk.Frame, app).quit()
         print()
+
+
