@@ -33,7 +33,9 @@ class Application(tk.Frame):
                              command=self.saveas, accelerator='Ctrl+Shift+S')
         self.bind_all('<Control-S>', self.saveas)
         filemenu.add_separator()
-        filemenu.add_command(label='Exit', underline=1, command=root.quit)
+        filemenu.add_command(label='Quit', underline=0, accelerator='Ctrl+Q',
+                             command=self.quit)
+        self.bind_all('<Control-q>', self.quit)
         self.menu.add_cascade(label='File', underline=0, menu=filemenu)
         root.config(menu=self.menu)
 
