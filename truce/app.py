@@ -9,6 +9,9 @@ import tkinter.filedialog
 import tkinter.messagebox
 import tkinter.scrolledtext
 
+from truce.catcher import Catcher
+
+
 VERSION = [0, 0, 0]
 ABANDON_MSG = 'Abandon unsaved changes?'
 
@@ -163,5 +166,10 @@ class App(tk.Frame):
 def main():
     global root
     root = tk.Tk()
+    tk.CallWrapper = Catcher
     app = App(master=root)
-    app.mainloop()
+    try:
+        app.mainloop()
+    except KeyboardInterrupt:
+        super(tk.Frame, app).quit()
+        print()
