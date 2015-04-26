@@ -23,6 +23,9 @@ class Application(tk.Frame):
         self.menu = tk.Menu(self)
 
         filemenu = tk.Menu(self.menu, tearoff=0)
+        filemenu.add_command(label='Open', underline=0, command=self.open,
+                             accelerator='Ctrl+O')
+        self.bind_all('<Control-o>', self.open)
         filemenu.add_command(label='Save', underline=0, command=self.save,
                              accelerator='Ctrl+S')
         self.bind_all('<Control-s>', self.save)
@@ -53,6 +56,18 @@ class Application(tk.Frame):
         else:
             self.master.title('{} {}.{}.{}'.format(sys.argv[0], *VERSION))
 
+    def open(self, event=None):
+        filename = tkinter.filedialog.askopenfilename()
+        if filename:
+            self.filename = filename
+            self.settitle()
+            self.textout.delete('1.0', 'end')
+            self.status['text'] = 'Opening...'
+            with open(filename) as f:
+                self.textout.insert('insert', f.read())
+            self.status['text'] = 'Opened "{}".'.format(
+                    os.path.basename(self.filename))
+
     def save(self, event=None):
         if self.filename:
             self.writeout()
@@ -70,7 +85,8 @@ class Application(tk.Frame):
         self.status['text'] = 'Saving...'
         with open(self.filename, 'w') as f:
             f.write(self.textout.get('1.0', 'end'))
-        self.status['text'] = 'Saved.'
+        self.status['text'] = 'Saved "{}".'.format(
+                os.path.basename(self.filename))
 
     def sendtext(self, event):
         self.textout.insert('end', self.textin.get('1.0', 'end'))
