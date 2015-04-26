@@ -8,6 +8,7 @@ import tkinter.scrolledtext
 
 VERSION = [0, 0, 0]
 
+
 class Application(tk.Frame):
     def __init__(self, master=None):
         tk.Frame.__init__(self, master)
@@ -24,7 +25,7 @@ class Application(tk.Frame):
         root.config(menu=self.menu)
 
         self.status = tkinter.Label(self, text='', relief='sunken',
-                anchor='w')
+                                    anchor='w')
         self.status.pack(side='bottom', fill='x')
 
         self.textin = tk.Text(self)
