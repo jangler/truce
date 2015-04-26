@@ -13,7 +13,7 @@ VERSION = [0, 0, 0]
 ABANDON_MSG = 'Abandon unsaved changes?'
 
 
-class Application(tk.Frame):
+class App(tk.Frame):
     def __init__(self, master=None):
         tk.Frame.__init__(self, master)
         self.pack(expand=1, fill='both')
@@ -75,7 +75,8 @@ class Application(tk.Frame):
         if self.filename:
             self.master.title(os.path.basename(self.filename))
         else:
-            self.master.title('{} {}.{}.{}'.format(sys.argv[0], *VERSION))
+            self.master.title('{} {}.{}.{}'.format(
+                os.path.basename(sys.argv[0]), *VERSION))
 
     def abandon(self):
         if not self.textout.edit_modified():
@@ -159,6 +160,8 @@ class Application(tk.Frame):
             super().quit()
 
 
-root = tk.Tk()
-app = Application(master=root)
-app.mainloop()
+def main():
+    global root
+    root = tk.Tk()
+    app = App(master=root)
+    app.mainloop()
