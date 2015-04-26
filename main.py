@@ -37,20 +37,32 @@ class Application(tk.Frame):
                              command=self.quit)
         self.bind_all('<Control-q>', self.quit)
         self.menu.add_cascade(label='File', underline=0, menu=filemenu)
+
+        editmenu = tk.Menu(self.menu, tearoff=0)
+        editmenu.add_command(label='Undo', underline=0, command=self.undo,
+                             accelerator='Ctrl+Z')
+        self.bind_all('<Control-z>', self.undo)
+        editmenu.add_command(label='Redo', underline=0, command=self.redo,
+                             accelerator='Ctrl+Y')
+        self.bind_all('<Control-y>', self.redo)
+        self.menu.add_cascade(label='Edit', underline=0, menu=editmenu)
+
         root.config(menu=self.menu)
 
         self.status = tkinter.Label(self, text='', relief='sunken',
                                     anchor='w')
         self.status.pack(side='bottom', fill='x')
 
-        self.textin = tk.Text(self)
-        self.textin['height'] = 0
+        self.textin = tk.Text(self, height=0, undo=1)
         self.textin.bind('<Return>', self.sendtext)
         self.textin.pack(side='bottom', fill='x')
 
-        self.textout = tkinter.scrolledtext.ScrolledText(self)
+        self.textout = tkinter.scrolledtext.ScrolledText(self, undo=1)
         self.textout.bind('<Return>', self.autoindent)
         self.textout.pack(side='bottom', expand=1, fill='both')
+
+    def state(self, text=''):
+        self.status['text'] = text
 
     def settitle(self):
         if self.filename:
@@ -64,11 +76,11 @@ class Application(tk.Frame):
             self.filename = filename
             self.settitle()
             self.textout.delete('1.0', 'end')
-            self.status['text'] = 'Opening...'
+            self.state('Opening...')
             with open(filename) as f:
                 self.textout.insert('insert', f.read())
-            self.status['text'] = 'Opened "{}".'.format(
-                    os.path.basename(self.filename))
+            self.state('Opened "{}".'.format(
+                os.path.basename(self.filename)))
 
     def save(self, event=None):
         if self.filename:
@@ -84,11 +96,10 @@ class Application(tk.Frame):
             self.writeout()
 
     def writeout(self):
-        self.status['text'] = 'Saving...'
+        self.state('Saving...')
         with open(self.filename, 'w') as f:
             f.write(self.textout.get('1.0', 'end'))
-        self.status['text'] = 'Saved "{}".'.format(
-                os.path.basename(self.filename))
+        self.state('Saved "{}".'.format(os.path.basename(self.filename)))
 
     def sendtext(self, event):
         self.textout.insert('end', self.textin.get('1.0', 'end'))
@@ -100,6 +111,28 @@ class Application(tk.Frame):
         indent = re.match('^[\t ]*', line).group(0)
         self.textout.insert('insert', '\n' + indent)
         return 'break'
+
+    def getundofocus(self):
+        widget = self.focus_get()
+        if widget not in (self.textin, self.textout):
+            widget = self.textout
+        return widget
+
+    def undo(self, event=None):
+        widget = self.getundofocus()
+        try:
+            widget.edit_undo()
+            self.state()
+        except tkinter.TclError as e:
+            self.state('Nothing to undo.')
+
+    def redo(self, event=None):
+        widget = self.getundofocus()
+        try:
+            widget.edit_redo()
+            self.state()
+        except tkinter.TclError as e:
+            self.state('Nothing to redo.')
 
 
 root = tk.Tk()
