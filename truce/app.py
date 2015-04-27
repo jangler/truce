@@ -10,6 +10,7 @@ import tkinter as tk
 import tkinter.filedialog
 import tkinter.messagebox
 import tkinter.scrolledtext
+import tkinter.simpledialog
 
 from truce.catcher import Catcher
 
@@ -59,6 +60,10 @@ class App(tk.Frame):
                              accelerator='Ctrl+Z')
         editmenu.add_command(label='Redo', underline=0, command=self.redo,
                              accelerator='Ctrl+Y')
+        editmenu.add_separator()
+        editmenu.add_command(label='Filter', underline=0, command=self.filter,
+                             accelerator='Ctrl+R')
+        self.bind_all('<Control-r>', self.filter)
         self.menu.add_cascade(label='Edit', underline=0, menu=editmenu)
 
         helpmenu = tk.Menu(self.menu, tearoff=0)
@@ -168,14 +173,26 @@ class App(tk.Frame):
         self.textout.insert('insert', '\n' + indent)
         return 'break'
 
-    def getundofocus(self):
+    def geteditfocus(self):
         widget = self.focus_get()
         if widget not in (self.textin, self.textout):
             widget = self.textout
         return widget
+        
+    def filter(self, event=None):
+        widget = self.geteditfocus()
+        try:
+            text = tkinter.simpledialog.askstring('Filter', 'Command:')
+            try:
+                widget.delete('sel.first', 'sel.last')
+            except tkinter.TclError:
+                pass
+            widget.insert('insert', text)
+        except tkinter.TclError:
+            pass
 
     def undo(self, event=None):
-        widget = self.getundofocus()
+        widget = self.geteditfocus()
         try:
             widget.edit_undo()
             self.state()
@@ -184,7 +201,7 @@ class App(tk.Frame):
         return 'break'
 
     def redo(self, event=None):
-        widget = self.getundofocus()
+        widget = self.geteditfocus()
         try:
             widget.edit_redo()
             self.state()
@@ -225,3 +242,4 @@ def main():
     except KeyboardInterrupt:
         super(tk.Frame, app).quit()
         print()
+
