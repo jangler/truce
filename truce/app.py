@@ -196,6 +196,7 @@ class App(tk.Frame):
             except tkinter.TclError:
                 pass
             widget.insert('insert', text)
+            widget.focus()
         except tkinter.TclError:
             pass
 
@@ -250,3 +251,4 @@ def main():
     except KeyboardInterrupt:
         super(tk.Frame, app).quit()
         print()
+
