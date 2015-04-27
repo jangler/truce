@@ -13,7 +13,7 @@ import tkinter.scrolledtext
 
 from truce.catcher import Catcher
 
-VERSION = [0, 0, 0]
+VERSION = [0, 1, 0]
 ABANDON_MSG = 'Abandon unsaved changes?'
 
 
@@ -105,7 +105,7 @@ class App(tk.Frame):
         elif tkinter.messagebox.askokcancel(ABANDON_MSG, ABANDON_MSG):
             return True
         return False
-    
+
     def error(self, e):
         self.state()
         traceback.print_exc()

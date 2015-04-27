@@ -9,7 +9,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name='truce',
-    version='0.0.0',
+    version='0.1.0',
     description='An experimental text editor and/or shell',
     long_description=long_description,
     url='https://github.com/jangler/truce',
@@ -17,7 +17,7 @@ setup(
     author_email='brandon@jangler.info',
     license='MIT',
     classifiers=[
-        'Development Status :: 2 - Pre-Alpha',
+        'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
         'Intended Audience :: End Users/Desktop',
         'Topic :: System :: Shells',
