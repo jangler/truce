@@ -3,6 +3,7 @@
 import argparse
 import os.path
 import re
+import subprocess
 import sys
 import traceback
 
@@ -178,11 +179,18 @@ class App(tk.Frame):
         if widget not in (self.textin, self.textout):
             widget = self.textout
         return widget
-        
+
     def filter(self, event=None):
         widget = self.geteditfocus()
         try:
-            text = tkinter.simpledialog.askstring('Filter', 'Command:')
+            cmd = tkinter.simpledialog.askstring('Filter', 'Command:')
+            intext = ''
+            try:
+                intext = widget.get('sel.first', 'sel.last')
+            except tkinter.TclError:
+                pass
+            text = subprocess.check_output(cmd, input=intext, shell=True,
+                                           universal_newlines=True, timeout=1)
             try:
                 widget.delete('sel.first', 'sel.last')
             except tkinter.TclError:
@@ -242,4 +250,3 @@ def main():
     except KeyboardInterrupt:
         super(tk.Frame, app).quit()
         print()
-
