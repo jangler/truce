@@ -342,6 +342,7 @@ class App(tk.Frame):
         if text.endswith('\n'):
             text = text[:len(text)-1]
         try:
+            widget.mark_set('insert', 'sel.first')
             widget.replace('sel.first', 'sel.last', text)
             widget.tag_add('sel', 'insert-{}c'.format(len(text)), 'insert')
         except tkinter.TclError:
