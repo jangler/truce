@@ -324,11 +324,14 @@ class App(tk.Frame):
                 text = subprocess.check_output(cmd, input=intext, shell=True,
                                                universal_newlines=True,
                                                timeout=1)
+                if text.endswith('\n'):
+                    text = text[:len(text)-1]
                 try:
                     widget.delete('sel.first', 'sel.last')
                 except tkinter.TclError:
                     pass
                 widget.insert('insert', text)
+                widget.tag_add('sel', 'insert-{}c'.format(len(text)), 'insert')
         except tkinter.TclError:
             pass
         widget.focus()
