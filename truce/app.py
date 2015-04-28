@@ -189,7 +189,10 @@ class App(tk.Frame):
     def filter(self, event=None):
         widget = self.geteditfocus()
         try:
-            cmd = tkinter.simpledialog.askstring('Filter', 'Command:')
+            cmd = tkinter.simpledialog.askstring(
+                'Filter', 'Filter selection through command:')
+            if not cmd:
+                return
             intext = ''
             try:
                 intext = widget.get('sel.first', 'sel.last')
