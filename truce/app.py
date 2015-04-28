@@ -54,6 +54,10 @@ class App(tk.Frame):
         filemenu.add_command(label='Quit', underline=0, accelerator='Ctrl+Q',
                              command=self.quit)
         self.bind_all('<Control-q>', self.quit)
+        filemenu.add_command(label='Force Quit', underline=0,
+                             accelerator='Ctrl+Shift+Q',
+                             command=self.powerquit)
+        self.bind_all('<Control-Q>', self.powerquit)
         self.menu.add_cascade(label='File', underline=0, menu=filemenu)
 
         editmenu = tk.Menu(self.menu, tearoff=0)
@@ -230,6 +234,9 @@ class App(tk.Frame):
     def quit(self, event=None):
         if self.abandon():
             super().quit()
+
+    def powerquit(self, event=None):
+        super().quit()
 
 
 def parseargs():
