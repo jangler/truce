@@ -95,9 +95,19 @@ class App(tk.Frame):
 
         root.config(menu=self.menu)
 
-        self.status = tkinter.Label(self, text='', relief='sunken',
+        barframe = tk.Frame(self)
+        barframe.pack(side='bottom', fill='x')
+
+        self.status = tkinter.Label(barframe, text='', relief='sunken',
                                     anchor='w')
-        self.status.pack(side='bottom', fill='x')
+        self.status.pack(side='left', fill='x', expand=1)
+
+        self.rowcol = tkinter.Label(barframe, text='', relief='sunken',
+                                    anchor='e')
+        self.rowcol.pack(side='right')
+        self.bind_all('<Key>', self.refresh)
+        self.bind_all('<Button>', self.refresh)
+        self.bind_all('<ButtonRelease>', self.refresh)
 
         self.textin = tk.Text(self, height=0, undo=1)
         self.textin.bind('<Return>', self.sendtext)
@@ -120,6 +130,9 @@ class App(tk.Frame):
             widget.bind('<Control-p>', self.pipe)
             widget.bind('<Control-w>', self.deleteword)
             widget.bind('<Control-u>', self.deleteline)
+
+    def refresh(self, event=None):
+        self.rowcol['text'] = self.textout.index('insert').replace('.', ', ')
 
     def about(self):
         tkinter.messagebox.showinfo('About', ABOUT)
@@ -168,6 +181,7 @@ class App(tk.Frame):
             filename = tkinter.filedialog.askopenfilename()
             if filename:
                 self.readin(filename)
+        self.refresh()
         return 'break'
 
     def save(self, event=None):
@@ -223,6 +237,7 @@ class App(tk.Frame):
         except tkinter.TclError:
             pass
         widget.focus()
+        self.refresh()
         return 'break'
 
     def refind(self, backwards=False):
@@ -233,15 +248,18 @@ class App(tk.Frame):
 
     def nextmatch(self, event=None):
         self.refind()
+        self.refresh()
         return 'break'
 
     def prevmatch(self, event=None):
         self.refind(backwards=True)
+        self.refresh()
         return 'break'
 
     def sendtext(self, event):
         self.textout.insert('end', self.textin.get('1.0', 'end'))
         self.textin.delete('1.0', 'end')
+        self.refresh()
         return 'break'
 
     def autoindent(self, event):
@@ -250,6 +268,7 @@ class App(tk.Frame):
             self.textout.delete('insert linestart', 'insert lineend')
         indent = re.match('^[\t ]*', line).group(0)
         self.textout.insert('insert', '\n' + indent)
+        self.refresh()
         return 'break'
 
     def geteditfocus(self):
@@ -288,6 +307,7 @@ class App(tk.Frame):
     def selectall(self, event=None):
         widget = self.geteditfocus()
         widget.tag_add('sel', '1.0', 'end')
+        self.refresh()
         return 'break'
 
     def pipe(self, event=None):
@@ -312,6 +332,7 @@ class App(tk.Frame):
         except tkinter.TclError:
             pass
         widget.focus()
+        self.refresh()
         return 'break'
 
     def undo(self, event=None):
@@ -321,6 +342,7 @@ class App(tk.Frame):
             self.state()
         except tkinter.TclError as e:
             self.state('{}.'.format(str(e).capitalize()))
+        self.refresh()
         return 'break'
 
     def redo(self, event=None):
@@ -330,6 +352,7 @@ class App(tk.Frame):
             self.state()
         except tkinter.TclError as e:
             self.state('{}.'.format(str(e).capitalize()))
+        self.refresh()
         return 'break'
 
     def quit(self, event=None):
