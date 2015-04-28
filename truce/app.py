@@ -42,7 +42,7 @@ class App(tk.Frame):
         self.menu = tk.Menu(self)
 
         filemenu = tk.Menu(self.menu, tearoff=0)
-        filemenu.add_command(label='Open', underline=0, command=self.open,
+        filemenu.add_command(label='Open...', underline=0, command=self.open,
                              accelerator='Ctrl+O')
         self.bind_all('<Control-o>', self.open)
         filemenu.add_command(label='Save', underline=0, command=self.save,
@@ -67,7 +67,7 @@ class App(tk.Frame):
         editmenu.add_command(label='Redo', underline=0, command=self.redo,
                              accelerator='Ctrl+Y')
         editmenu.add_separator()
-        editmenu.add_command(label='Pipe', underline=0, command=self.pipe,
+        editmenu.add_command(label='Pipe...', underline=0, command=self.pipe,
                              accelerator='Ctrl+P')
         self.bind_all('<Control-p>', self.pipe)
         self.menu.add_cascade(label='Edit', underline=0, menu=editmenu)
@@ -77,7 +77,7 @@ class App(tk.Frame):
                                command=self.selectall, accelerator='Ctrl+A')
         self.bind_all('<Control-a>', self.selectall)
         selectmenu.add_separator()
-        selectmenu.add_command(label='Find', underline=0, command=self.find,
+        selectmenu.add_command(label='Find...', underline=0, command=self.find,
                                accelerator='Ctrl+F')
         self.bind_all('<Control-f>', self.find)
         selectmenu.add_command(label='Next Match', underline=0,
@@ -90,7 +90,7 @@ class App(tk.Frame):
         self.menu.add_cascade(label='Select', underline=0, menu=selectmenu)
 
         helpmenu = tk.Menu(self.menu, tearoff=0)
-        helpmenu.add_command(label='About', underline=0, command=self.about)
+        helpmenu.add_command(label='About...', underline=0, command=self.about)
         self.menu.add_cascade(label='Help', underline=0, menu=helpmenu)
 
         root.config(menu=self.menu)
@@ -101,7 +101,7 @@ class App(tk.Frame):
 
         self.textin = tk.Text(self, height=0, undo=1)
         self.textin.bind('<Return>', self.sendtext)
-        self.textin.pack(side='bottom', fill='x')
+        # self.textin.pack(side='bottom', fill='x')
 
         self.textout = tkinter.scrolledtext.ScrolledText(self, undo=1)
         self.textout.bind('<Return>', self.autoindent)
