@@ -231,23 +231,23 @@ class App(tk.Frame):
         try:
             cmd = tkinter.simpledialog.askstring(
                 'Pipe', 'Pipe selection through command:')
-            if not cmd:
-                return
-            intext = ''
-            try:
-                intext = widget.get('sel.first', 'sel.last')
-            except tkinter.TclError:
-                pass
-            text = subprocess.check_output(cmd, input=intext, shell=True,
-                                           universal_newlines=True, timeout=1)
-            try:
-                widget.delete('sel.first', 'sel.last')
-            except tkinter.TclError:
-                pass
-            widget.insert('insert', text)
-            widget.focus()
+            if cmd:
+                intext = ''
+                try:
+                    intext = widget.get('sel.first', 'sel.last')
+                except tkinter.TclError:
+                    pass
+                text = subprocess.check_output(cmd, input=intext, shell=True,
+                                               universal_newlines=True,
+                                               timeout=1)
+                try:
+                    widget.delete('sel.first', 'sel.last')
+                except tkinter.TclError:
+                    pass
+                widget.insert('insert', text)
         except tkinter.TclError:
             pass
+        widget.focus()
 
     def undo(self, event=None):
         widget = self.geteditfocus()
