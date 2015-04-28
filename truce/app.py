@@ -79,19 +79,18 @@ class App(tk.Frame):
 
         self.textin = tk.Text(self, height=0, undo=1)
         self.textin.bind('<Return>', self.sendtext)
-        self.textin.bind('<Control-z>', self.undo)
-        self.textin.bind('<Control-y>', self.redo)
-        self.textin.bind('<Control-Z>', self.redo)
-        self.textin.bind('<Control-o>', self.open)
         self.textin.pack(side='bottom', fill='x')
 
         self.textout = tkinter.scrolledtext.ScrolledText(self, undo=1)
         self.textout.bind('<Return>', self.autoindent)
-        self.textout.bind('<Control-z>', self.undo)
-        self.textout.bind('<Control-y>', self.redo)
-        self.textout.bind('<Control-Z>', self.redo)
-        self.textout.bind('<Control-o>', self.open)
         self.textout.pack(side='bottom', expand=1, fill='both')
+
+        for widget in (self.textin, self.textout):
+            widget.bind('<Control-z>', self.undo)
+            widget.bind('<Control-y>', self.redo)
+            widget.bind('<Control-Z>', self.redo)
+            widget.bind('<Control-o>', self.open)
+            widget.bind('<Control-v>', self.deletesel)
 
     def about(self):
         tkinter.messagebox.showinfo('About', ABOUT)
@@ -180,6 +179,13 @@ class App(tk.Frame):
             widget = self.textout
         return widget
 
+    def deletesel(self, event):
+        widget = event.widget
+        try:
+            widget.delete('sel.first', 'sel.last')
+        except tkinter.TclError:
+            pass
+
     def filter(self, event=None):
         widget = self.geteditfocus()
         try:
@@ -251,4 +257,3 @@ def main():
     except KeyboardInterrupt:
         super(tk.Frame, app).quit()
         print()
-
