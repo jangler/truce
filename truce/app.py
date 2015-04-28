@@ -102,6 +102,8 @@ class App(tk.Frame):
             widget.bind('<Control-o>', self.open)
             widget.bind('<Control-v>', self.deletesel)
             widget.bind('<Control-a>', self.selectall)
+            widget.bind('<Control-w>', self.deleteword)
+            widget.bind('<Control-u>', self.deleteline)
 
     def about(self):
         tkinter.messagebox.showinfo('About', ABOUT)
@@ -116,7 +118,7 @@ class App(tk.Frame):
             self.master.title(signature())
 
     def abandon(self):
-        if not self.textout.edit_modified():
+        if not (self.filename and self.textout.edit_modified()):
             return True
         elif tkinter.messagebox.askokcancel(ABANDON_MSG, ABANDON_MSG):
             return True
@@ -193,11 +195,31 @@ class App(tk.Frame):
         return widget
 
     def deletesel(self, event):
-        widget = event.widget
         try:
-            widget.delete('sel.first', 'sel.last')
+            event.widget.delete('sel.first', 'sel.last')
         except tkinter.TclError:
             pass
+
+    def backup(self, widget, dist, rule):
+        while True:
+            c = widget.get('insert-{}c'.format(dist + 1),
+                           'insert-{}c'.format(dist))
+            if not c or not rule(c):
+                break
+            dist += 1
+        return dist, c
+
+    def deleteword(self, event):
+        dist, char = self.backup(event.widget, 0, lambda c: c.isspace())
+        if char.isalnum() or char == '_':
+            rule = lambda c: c.isalnum() or c == '_'
+        else:
+            rule = lambda c: not (c.isalnum() or c == '_')
+        dist, _ = self.backup(event.widget, dist, rule)
+        event.widget.delete('insert-{}c'.format(dist), 'insert')
+
+    def deleteline(self, event):
+        event.widget.delete('insert linestart', 'insert')
 
     def selectall(self, event=None):
         widget = self.geteditfocus()
