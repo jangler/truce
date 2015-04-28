@@ -93,6 +93,10 @@ class App(tk.Frame):
                                command=self.prevmatch,
                                accelerator='Alt+Shift+N')
         self.bind_all('<Alt-N>', self.prevmatch)
+        selectmenu.add_separator()
+        selectmenu.add_command(label='Go to Line...', underline=0,
+                               command=self.gotoline, accelerator='Ctrl+G')
+        self.bind_all('<Control-g>', self.gotoline)
         self.menu.add_cascade(label='Select', underline=0, menu=selectmenu)
 
         helpmenu = tk.Menu(self.menu, tearoff=0)
@@ -274,6 +278,19 @@ class App(tk.Frame):
         self.refind(backwards=True)
         self.refresh()
         return 'break'
+
+    def gotoline(self, event=None):
+        try:
+            line = tkinter.simpledialog.askinteger(
+                'Go to Line', 'Go to line number:')
+            if line or line == 0:
+                index = '{}.end'.format(line)
+                self.textout.mark_set('insert', index)
+                self.textout.see(index)
+                self.textout.tag_remove('sel', '1.0', 'end')
+        except tkinter.TclError:
+            pass
+        self.textout.focus()
 
     def sendtext(self, event):
         self.textout.insert('end', self.textin.get('1.0', 'end'))
