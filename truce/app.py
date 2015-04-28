@@ -66,9 +66,9 @@ class App(tk.Frame):
         editmenu.add_command(label='Redo', underline=0, command=self.redo,
                              accelerator='Ctrl+Y')
         editmenu.add_separator()
-        editmenu.add_command(label='Filter', underline=0, command=self.filter,
-                             accelerator='Ctrl+R')
-        self.bind_all('<Control-r>', self.filter)
+        editmenu.add_command(label='Pipe', underline=0, command=self.pipe,
+                             accelerator='Ctrl+P')
+        self.bind_all('<Control-p>', self.pipe)
         self.menu.add_cascade(label='Edit', underline=0, menu=editmenu)
 
         helpmenu = tk.Menu(self.menu, tearoff=0)
@@ -193,11 +193,11 @@ class App(tk.Frame):
         except tkinter.TclError:
             pass
 
-    def filter(self, event=None):
+    def pipe(self, event=None):
         widget = self.geteditfocus()
         try:
             cmd = tkinter.simpledialog.askstring(
-                'Filter', 'Filter selection through command:')
+                'Pipe', 'Pipe selection through command:')
             if not cmd:
                 return
             intext = ''
