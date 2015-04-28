@@ -348,9 +348,9 @@ class App(tk.Frame):
                     text = text[:len(text)-1]
                 try:
                     widget.replace('sel.first', 'sel.last', text)
+                    widget.tag_add('sel', 'insert-{}c'.format(len(text)), 'insert')
                 except tkinter.TclError:
                     widget.insert('insert', text)
-                widget.tag_add('sel', 'insert-{}c'.format(len(text)), 'insert')
         except tkinter.TclError:
             pass
         widget.focus()
