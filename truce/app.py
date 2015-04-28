@@ -34,6 +34,7 @@ class App(tk.Frame):
         self.pack(expand=1, fill='both')
         self.createWidgets()
         self.filename = None
+        self.regexp = None
         self.settitle()
         master.protocol("WM_DELETE_WINDOW", self.quit)
 
@@ -75,6 +76,14 @@ class App(tk.Frame):
         selectmenu.add_command(label='All', underline=0,
                                command=self.selectall, accelerator='Ctrl+A')
         self.bind_all('<Control-a>', self.selectall)
+        selectmenu.add_separator()
+        selectmenu.add_command(label='Find Next', underline=5,
+                               command=self.findnext, accelerator='Ctrl+F')
+        self.bind_all('<Control-f>', self.findnext)
+        selectmenu.add_command(label='Find Previous', underline=5,
+                               command=self.findnext,
+                               accelerator='Ctrl+Shift+F')
+        self.bind_all('<Control-F>', self.findprevious)
         self.menu.add_cascade(label='Select', underline=0, menu=selectmenu)
 
         helpmenu = tk.Menu(self.menu, tearoff=0)
@@ -102,6 +111,9 @@ class App(tk.Frame):
             widget.bind('<Control-o>', self.open)
             widget.bind('<Control-v>', self.deletesel)
             widget.bind('<Control-a>', self.selectall)
+            widget.bind('<Control-f>', self.findnext)
+            widget.bind('<Control-F>', self.findprevious)
+            widget.bind('<Control-p>', self.pipe)
             widget.bind('<Control-w>', self.deleteword)
             widget.bind('<Control-u>', self.deleteline)
 
@@ -177,6 +189,38 @@ class App(tk.Frame):
         except Exception as e:
             self.error(e)
 
+    def find(self, backwards=False):
+        widget = self.geteditfocus()
+        try:
+            title = 'Find Previous' if backwards else 'Find Next'
+            offset = '-1c' if backwards else '+1c'
+            regexp = tkinter.simpledialog.askstring(title,
+                                                    'Search for regexp:')
+            if regexp:
+                index = widget.search(regexp, 'insert{}'.format(offset),
+                                      backwards=backwards, regexp=True)
+                if index:
+                    widget.mark_set('insert', index)
+                    widget.see(index)
+                    text = widget.get('insert', 'end')
+                    length = len(re.match(regexp, text).group(0))
+                    widget.tag_remove('sel', '1.0', 'end')
+                    widget.tag_add('sel', 'insert',
+                                   'insert+{}c'.format(length))
+                else:
+                    self.state('No matches for "{}".'.format(regexp))
+        except tkinter.TclError:
+            pass
+        widget.focus()
+
+    def findnext(self, event=None):
+        self.find()
+        return 'break'
+
+    def findprevious(self, event=None):
+        self.find(backwards=True)
+        return 'break'
+
     def sendtext(self, event):
         self.textout.insert('end', self.textin.get('1.0', 'end'))
         self.textin.delete('1.0', 'end')
@@ -248,6 +292,7 @@ class App(tk.Frame):
         except tkinter.TclError:
             pass
         widget.focus()
+        return 'break'
 
     def undo(self, event=None):
         widget = self.geteditfocus()
