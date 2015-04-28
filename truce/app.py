@@ -80,6 +80,7 @@ class App(tk.Frame):
         selectmenu.add_command(label='Find...', underline=0, command=self.find,
                                accelerator='Ctrl+F')
         self.bind_all('<Control-f>', self.find)
+        self.bind_all('<Control-slash>', self.find)
         selectmenu.add_command(label='Next Match', underline=0,
                                command=self.nextmatch, accelerator='Ctrl+N')
         self.bind_all('<Control-n>', self.nextmatch)
@@ -106,8 +107,8 @@ class App(tk.Frame):
                                     anchor='e')
         self.rowcol.pack(side='right')
         self.bind_all('<Key>', self.refresh)
-        self.bind_all('<Button>', self.refresh)
-        self.bind_all('<ButtonRelease>', self.refresh)
+        self.bind_all('<Button-1>', self.refresh)
+        self.bind_all('<ButtonRelease-1>', self.refresh)
 
         self.textin = tk.Text(self, height=0, undo=1)
         self.textin.bind('<Return>', self.sendtext)
@@ -125,6 +126,7 @@ class App(tk.Frame):
             widget.bind('<Control-v>', self.deletesel)
             widget.bind('<Control-a>', self.selectall)
             widget.bind('<Control-f>', self.find)
+            widget.bind('<Control-slash>', self.find)
             widget.bind('<Control-n>', self.nextmatch)
             widget.bind('<Control-N>', self.prevmatch)
             widget.bind('<Control-p>', self.pipe)
@@ -173,6 +175,7 @@ class App(tk.Frame):
         self.textout.delete('end - 1 char', 'end')  # delete extra newline
         self.state('Opened "{}".'.format(os.path.basename(filename)))
         self.textout.edit_modified(0)
+        self.textout.edit_reset()
         self.filename = filename
         self.settitle()
 
@@ -264,10 +267,12 @@ class App(tk.Frame):
 
     def autoindent(self, event):
         line = self.textout.get('insert linestart', 'insert lineend')
-        if re.match('^( |\t)+$', line):
-            self.textout.delete('insert linestart', 'insert lineend')
         indent = re.match('^[\t ]*', line).group(0)
-        self.textout.insert('insert', '\n' + indent)
+        if re.match('^( |\t)+$', line):
+            self.textout.replace('insert linestart', 'insert lineend',
+                                 '\n' + indent)
+        else:
+            self.textout.insert('insert', '\n' + indent)
         self.refresh()
         return 'break'
 
@@ -327,10 +332,9 @@ class App(tk.Frame):
                 if text.endswith('\n'):
                     text = text[:len(text)-1]
                 try:
-                    widget.delete('sel.first', 'sel.last')
+                    widget.replace('sel.first', 'sel.last', text)
                 except tkinter.TclError:
-                    pass
-                widget.insert('insert', text)
+                    widget.insert('insert', text)
                 widget.tag_add('sel', 'insert-{}c'.format(len(text)), 'insert')
         except tkinter.TclError:
             pass
