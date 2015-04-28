@@ -77,13 +77,16 @@ class App(tk.Frame):
                                command=self.selectall, accelerator='Ctrl+A')
         self.bind_all('<Control-a>', self.selectall)
         selectmenu.add_separator()
-        selectmenu.add_command(label='Find Next', underline=5,
-                               command=self.findnext, accelerator='Ctrl+F')
-        self.bind_all('<Control-f>', self.findnext)
-        selectmenu.add_command(label='Find Previous', underline=5,
-                               command=self.findnext,
-                               accelerator='Ctrl+Shift+F')
-        self.bind_all('<Control-F>', self.findprevious)
+        selectmenu.add_command(label='Find', underline=0, command=self.find,
+                               accelerator='Ctrl+F')
+        self.bind_all('<Control-f>', self.find)
+        selectmenu.add_command(label='Next Match', underline=0,
+                               command=self.nextmatch, accelerator='Ctrl+N')
+        self.bind_all('<Control-n>', self.nextmatch)
+        selectmenu.add_command(label='Previous Match', underline=0,
+                               command=self.prevmatch,
+                               accelerator='Ctrl+Shift+N')
+        self.bind_all('<Control-N>', self.prevmatch)
         self.menu.add_cascade(label='Select', underline=0, menu=selectmenu)
 
         helpmenu = tk.Menu(self.menu, tearoff=0)
@@ -111,8 +114,9 @@ class App(tk.Frame):
             widget.bind('<Control-o>', self.open)
             widget.bind('<Control-v>', self.deletesel)
             widget.bind('<Control-a>', self.selectall)
-            widget.bind('<Control-f>', self.findnext)
-            widget.bind('<Control-F>', self.findprevious)
+            widget.bind('<Control-f>', self.find)
+            widget.bind('<Control-n>', self.nextmatch)
+            widget.bind('<Control-N>', self.prevmatch)
             widget.bind('<Control-p>', self.pipe)
             widget.bind('<Control-w>', self.deleteword)
             widget.bind('<Control-u>', self.deleteline)
@@ -189,36 +193,50 @@ class App(tk.Frame):
         except Exception as e:
             self.error(e)
 
-    def find(self, backwards=False):
+    def search(self, regexp, backwards=False):
+        widget = self.geteditfocus()
+        offset = '-1c' if backwards else '+1c'
+        index = widget.search(regexp, 'insert{}'.format(offset),
+                              backwards=backwards, regexp=True)
+        if index:
+            widget.mark_set('insert', index)
+            widget.see(index)
+            widget.tag_remove('sel', '1.0', 'end')
+            text = widget.get('insert', 'end')
+            match = re.match(regexp, text, flags=re.MULTILINE)
+            if match:
+                length = len(match.group(0))
+                widget.tag_add('sel', 'insert',
+                               'insert+{}c'.format(length))
+            self.state()
+        else:
+            self.state('No matches for "{}".'.format(regexp))
+        self.regexp = regexp
+
+    def find(self, event=None):
         widget = self.geteditfocus()
         try:
-            title = 'Find Previous' if backwards else 'Find Next'
-            offset = '-1c' if backwards else '+1c'
-            regexp = tkinter.simpledialog.askstring(title,
-                                                    'Search for regexp:')
+            regexp = tkinter.simpledialog.askstring(
+                'Find', 'Search for regexp:')
             if regexp:
-                index = widget.search(regexp, 'insert{}'.format(offset),
-                                      backwards=backwards, regexp=True)
-                if index:
-                    widget.mark_set('insert', index)
-                    widget.see(index)
-                    text = widget.get('insert', 'end')
-                    length = len(re.match(regexp, text).group(0))
-                    widget.tag_remove('sel', '1.0', 'end')
-                    widget.tag_add('sel', 'insert',
-                                   'insert+{}c'.format(length))
-                else:
-                    self.state('No matches for "{}".'.format(regexp))
+                self.search(regexp)
         except tkinter.TclError:
             pass
         widget.focus()
-
-    def findnext(self, event=None):
-        self.find()
         return 'break'
 
-    def findprevious(self, event=None):
-        self.find(backwards=True)
+    def refind(self, backwards=False):
+        if self.regexp:
+            self.search(self.regexp, backwards=backwards)
+        else:
+            self.state('Nothing to find.')
+
+    def nextmatch(self, event=None):
+        self.refind()
+        return 'break'
+
+    def prevmatch(self, event=None):
+        self.refind(backwards=True)
         return 'break'
 
     def sendtext(self, event):
