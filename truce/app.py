@@ -5,6 +5,7 @@ import os.path
 import re
 import subprocess
 import sys
+import threading
 import traceback
 
 import tkinter as tk
@@ -330,6 +331,23 @@ class App(tk.Frame):
         self.refresh()
         return 'break'
 
+    def pipecmd(self, widget, cmd, intext):
+        self.state('Running `{}`...'.format(cmd))
+        try:
+            text = subprocess.check_output(cmd, input=intext, shell=True,
+                                           universal_newlines=True, timeout=5)
+        except subprocess.SubprocessError as e:
+            self.error(e)
+            return
+        if text.endswith('\n'):
+            text = text[:len(text)-1]
+        try:
+            widget.replace('sel.first', 'sel.last', text)
+            widget.tag_add('sel', 'insert-{}c'.format(len(text)), 'insert')
+        except tkinter.TclError:
+            widget.insert('insert', text)
+        self.state()
+
     def pipe(self, event=None):
         widget = self.geteditfocus()
         try:
@@ -341,16 +359,8 @@ class App(tk.Frame):
                     intext = widget.get('sel.first', 'sel.last')
                 except tkinter.TclError:
                     pass
-                text = subprocess.check_output(cmd, input=intext, shell=True,
-                                               universal_newlines=True,
-                                               timeout=1)
-                if text.endswith('\n'):
-                    text = text[:len(text)-1]
-                try:
-                    widget.replace('sel.first', 'sel.last', text)
-                    widget.tag_add('sel', 'insert-{}c'.format(len(text)), 'insert')
-                except tkinter.TclError:
-                    widget.insert('insert', text)
+                threading.Thread(target=self.pipecmd,
+                                 args=[widget, cmd, intext]).start()
         except tkinter.TclError:
             pass
         widget.focus()
