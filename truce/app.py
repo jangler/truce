@@ -71,6 +71,12 @@ class App(tk.Frame):
         self.bind_all('<Control-p>', self.pipe)
         self.menu.add_cascade(label='Edit', underline=0, menu=editmenu)
 
+        selectmenu = tk.Menu(self.menu, tearoff=0)
+        selectmenu.add_command(label='All', underline=0,
+                               command=self.selectall, accelerator='Ctrl+A')
+        self.bind_all('<Control-a>', self.selectall)
+        self.menu.add_cascade(label='Select', underline=0, menu=selectmenu)
+
         helpmenu = tk.Menu(self.menu, tearoff=0)
         helpmenu.add_command(label='About', underline=0, command=self.about)
         self.menu.add_cascade(label='Help', underline=0, menu=helpmenu)
@@ -95,6 +101,7 @@ class App(tk.Frame):
             widget.bind('<Control-Z>', self.redo)
             widget.bind('<Control-o>', self.open)
             widget.bind('<Control-v>', self.deletesel)
+            widget.bind('<Control-a>', self.selectall)
 
     def about(self):
         tkinter.messagebox.showinfo('About', ABOUT)
@@ -131,8 +138,7 @@ class App(tk.Frame):
             else:
                 self.error(e)
             return
-        self.textout.delete('1.0', 'end')
-        self.textout.insert('end', text)
+        self.textout.replace('1.0', 'end', text)
         self.textout.delete('end - 1 char', 'end')  # delete extra newline
         self.state('Opened "{}".'.format(os.path.basename(filename)))
         self.textout.edit_modified(0)
@@ -192,6 +198,11 @@ class App(tk.Frame):
             widget.delete('sel.first', 'sel.last')
         except tkinter.TclError:
             pass
+
+    def selectall(self, event=None):
+        widget = self.geteditfocus()
+        widget.tag_add('sel', '1.0', 'end')
+        return 'break'
 
     def pipe(self, event=None):
         widget = self.geteditfocus()
