@@ -126,11 +126,14 @@ class App(tk.Frame):
             with open(filename) as f:
                 text = f.read()
         except Exception as e:
-            if not quiet:
+            if quiet:
+                self.state('New file "{}".'.format(os.path.basename(filename)))
+            else:
                 self.error(e)
             return
         self.textout.delete('1.0', 'end')
-        self.textout.insert('insert', text)
+        self.textout.insert('end', text)
+        self.textout.delete('end - 1 char', 'end')  # delete extra newline
         self.state('Opened "{}".'.format(os.path.basename(filename)))
         self.textout.edit_modified(0)
         self.filename = filename
