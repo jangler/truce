@@ -246,6 +246,8 @@ class App(tk.Frame):
 
     def autoindent(self, event):
         line = self.textout.get('insert linestart', 'insert lineend')
+        if re.match('^( |\t)+$', line):
+            self.textout.delete('insert linestart', 'insert lineend')
         indent = re.match('^[\t ]*', line).group(0)
         self.textout.insert('insert', '\n' + indent)
         return 'break'
