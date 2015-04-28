@@ -306,6 +306,7 @@ class App(tk.Frame):
                                  '\n' + indent)
         else:
             self.textout.insert('insert', '\n' + indent)
+        self.textout.see('insert')
         self.refresh()
         return 'break'
 
