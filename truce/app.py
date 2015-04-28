@@ -42,9 +42,13 @@ class App(tk.Frame):
         self.menu = tk.Menu(self)
 
         filemenu = tk.Menu(self.menu, tearoff=0)
+        filemenu.add_command(label='New', underline=0, command=self.newfile,
+                             accelerator='Ctrl+N')
+        self.bind_all('<Control-n>', self.newfile)
         filemenu.add_command(label='Open...', underline=0, command=self.open,
                              accelerator='Ctrl+O')
         self.bind_all('<Control-o>', self.open)
+        filemenu.add_separator()
         filemenu.add_command(label='Save', underline=0, command=self.save,
                              accelerator='Ctrl+S')
         self.bind_all('<Control-s>', self.save)
@@ -82,12 +86,12 @@ class App(tk.Frame):
         self.bind_all('<Control-f>', self.find)
         self.bind_all('<Control-slash>', self.find)
         selectmenu.add_command(label='Next Match', underline=0,
-                               command=self.nextmatch, accelerator='Ctrl+N')
-        self.bind_all('<Control-n>', self.nextmatch)
+                               command=self.nextmatch, accelerator='Alt+N')
+        self.bind_all('<Alt-n>', self.nextmatch)
         selectmenu.add_command(label='Previous Match', underline=0,
                                command=self.prevmatch,
-                               accelerator='Ctrl+Shift+N')
-        self.bind_all('<Control-N>', self.prevmatch)
+                               accelerator='Alt+Shift+N')
+        self.bind_all('<Alt-N>', self.prevmatch)
         self.menu.add_cascade(label='Select', underline=0, menu=selectmenu)
 
         helpmenu = tk.Menu(self.menu, tearoff=0)
@@ -127,8 +131,9 @@ class App(tk.Frame):
             widget.bind('<Control-a>', self.selectall)
             widget.bind('<Control-f>', self.find)
             widget.bind('<Control-slash>', self.find)
-            widget.bind('<Control-n>', self.nextmatch)
-            widget.bind('<Control-N>', self.prevmatch)
+            widget.bind('<Alt-n>', self.nextmatch)
+            widget.bind('<Alt-N>', self.prevmatch)
+            widget.bind('<Control-n>', self.newfile)
             widget.bind('<Control-p>', self.pipe)
             widget.bind('<Control-w>', self.deleteword)
             widget.bind('<Control-u>', self.deleteline)
@@ -159,6 +164,16 @@ class App(tk.Frame):
         self.state()
         traceback.print_exc()
         tkinter.messagebox.showerror(type(e).__name__, str(e))
+
+    def newfile(self, event=None):
+        if not self.abandon():
+            return 'break'
+        self.state()
+        self.textout.delete('1.0', 'end')
+        self.textout.edit_modified(0)
+        self.textout.edit_reset()
+        self.filename = None
+        self.settitle()
 
     def readin(self, filename, quiet=False):
         self.state('Opening...')
