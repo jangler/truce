@@ -333,11 +333,14 @@ class App(tk.Frame):
 
     def deleteword(self, event):
         dist, char = self.backup(event.widget, 0, lambda c: c.isspace())
+        wordrule = lambda c: c.isalnum() or c == '_'
+        nonwordrule = lambda c: not (c.isalnum() or c == '_' or c.isspace())
         if char.isalnum() or char == '_':
-            rule = lambda c: c.isalnum() or c == '_'
+            dist, _ = self.backup(event.widget, dist, wordrule) 
+            dist, _ = self.backup(event.widget, dist, nonwordrule)
         else:
-            rule = lambda c: not (c.isalnum() or c == '_')
-        dist, _ = self.backup(event.widget, dist, rule)
+            dist, _ = self.backup(event.widget, dist, nonwordrule)
+            dist, _ = self.backup(event.widget, dist, wordrule)
         event.widget.delete('insert-{}c'.format(dist), 'insert')
 
     def deleteline(self, event):
