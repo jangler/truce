@@ -9,7 +9,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name='truce',
-    version='0.1.0',
+    version='0.2.0',
     description='An experimental text editor and/or shell',
     long_description=long_description,
     url='https://github.com/jangler/truce',
@@ -25,6 +25,7 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3 :: Only',
         'Operating System :: OS Independent',
     ],
     keywords=['truce', 'text', 'editor', 'shell', 'tkinter'],

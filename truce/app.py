@@ -16,7 +16,7 @@ import tkinter.simpledialog
 
 from truce.catcher import Catcher
 
-VERSION = [0, 1, 0]
+VERSION = [0, 2, 0]
 ABANDON_MSG = 'Abandon unsaved changes?'
 
 
