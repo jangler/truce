@@ -5,8 +5,8 @@ An experimental text editor and/or shell (alpha status). Currently, it's
 essentially just a minimal text editor with the ability to pipe selected
 text through an arbitrary shell command.
 
-Future plans include the ability to use the editor as a filter in
-pipes, and the ability use it to interact with shell-like or REPL-like
+Future plans include the ability to use the editor as a filter in pipes,
+and the ability to use it to interact with shell-like or REPL-like
 programs.
 
 Installation
