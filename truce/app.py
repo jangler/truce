@@ -198,6 +198,8 @@ class App(tk.Frame):
         self.textout.edit_reset()
         self.filename = filename
         self.settitle()
+        self.textout.mark_set('insert', '1.0')
+        self.textout.see('insert')
 
     def open(self, event=None):
         if self.abandon():
