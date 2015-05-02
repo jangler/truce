@@ -16,7 +16,7 @@ import tkinter.simpledialog
 
 from truce.catcher import Catcher
 
-VERSION = [0, 2, 0]
+VERSION = [0, 2, 1]
 ABANDON_MSG = 'Abandon unsaved changes?'
 
 
@@ -26,7 +26,7 @@ def signature():
 
 ABOUT = """{}
 
-http://github.com/jangler/truce""".format(signature())
+http://github.com/jangler/truce-py""".format(signature())
 
 
 class App(tk.Frame):

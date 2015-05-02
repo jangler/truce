@@ -9,10 +9,10 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name='truce',
-    version='0.2.0',
+    version='0.2.1',
     description='An experimental text editor and/or shell',
     long_description=long_description,
-    url='https://github.com/jangler/truce',
+    url='https://github.com/jangler/truce-py',
     author='Brandon Mulcahy',
     author_email='brandon@jangler.info',
     license='MIT',
