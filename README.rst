@@ -1,7 +1,7 @@
 Truce
 =====
 
-*This project has been superseded by http://github.com/jangler/truce.*
+*This project has been superseded by http://github.com/jangler/fervor.*
 
 An experimental text editor and/or shell (alpha status). Currently, it's
 essentially just a minimal text editor with the ability to pipe selected
